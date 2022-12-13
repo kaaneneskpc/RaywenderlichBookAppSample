@@ -38,6 +38,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -45,6 +47,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
@@ -53,6 +57,7 @@ import com.raywenderlich.android.librarian.R
 import com.raywenderlich.android.librarian.model.relations.BookReview
 import com.raywenderlich.android.librarian.repository.LibrarianRepository
 import com.raywenderlich.android.librarian.ui.bookReviewDetails.BookReviewDetailsActivity
+import com.raywenderlich.android.librarian.ui.composeUi.DeleteReviewDialog
 import com.raywenderlich.android.librarian.ui.composeUi.TopBar
 import com.raywenderlich.android.librarian.ui.reviews.ui.BookReviewsList
 import com.raywenderlich.android.librarian.utils.toast
@@ -73,6 +78,7 @@ class BookReviewsFragment : Fragment() {
   lateinit var repository: LibrarianRepository
 
   val bookReviewsState = mutableStateOf(emptyList<BookReview>())
+  private val _deleteReviewState = mutableStateOf<BookReview?>(null)
 
   private val addReviewContract by lazy {
     registerForActivityResult(AddBookReviewContract()) { isReviewAdded ->
@@ -129,12 +135,29 @@ class BookReviewsFragment : Fragment() {
   fun BookReviewsContentWrapper() {
     val bookReviews = bookReviewsState.value
 
-    BookReviewsList(bookReviews, onItemClick = ::onItemSelected)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      val reviewToDelete = _deleteReviewState.value
+      BookReviewsList(bookReviews, onItemClick = ::onItemSelected, onItemLongClick = { _deleteReviewState.value = it })
+      if(reviewToDelete != null) {
+        DeleteReviewDialog(
+          item = reviewToDelete,
+          message = stringResource(id = R.string.delete_review_message, reviewToDelete.book.name),
+          onDeleteItem =  { bookReview ->
+              deleteReview(bookReview)
+              _deleteReviewState.value = null
+          },
+          onDismiss = {
+            _deleteReviewState.value = null
+          }
+        )
+      }
+    }
   }
 
   fun deleteReview(bookReview: BookReview) {
     lifecycleScope.launch {
       repository.removeReview(bookReview.review)
+      bookReviewsState.value = repository.getReviews()
     }
   }
 
