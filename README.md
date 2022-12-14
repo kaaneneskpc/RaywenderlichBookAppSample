@@ -14,7 +14,6 @@ Book application using @Raywenderlich infrastructure
 <li><a href="https://square.github.io/retrofit/">Retrofit</a> Pulling data from API </li>
 <li><a href="https://developer.android.com/jetpack">Jetpack Components</a> ViewModel, LiveData, DataBinding and more </li>
 <li><a href="https://developer.android.com/studio/test">Testing</a> ViewModel, LiveData, DataBinding and more component are testing for best result of app </li>
-<li><a href="https://developer.android.com/studio/test">Testing</a> ViewModel, LiveData, DataBinding and more component are testing for best result of app </li>
 <li><a href="https://firebase.google.com/">Firebase</a> Firebase is a backend platform for building Web, Android and IOS applications. It offers real time database, different APIs, multiple authentication types and hosting platform. </li>
 
 </ul>
