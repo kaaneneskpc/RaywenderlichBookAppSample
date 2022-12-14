@@ -1,4 +1,4 @@
-package com.raywenderlich.android.librarian.ui.readingList
+package com.raywenderlich.android.librarian.ui.readingList.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +56,4 @@ fun AddReadingList(
                 onClick = { onAddList(inputState.value) })
         }
     }
-
-
 }

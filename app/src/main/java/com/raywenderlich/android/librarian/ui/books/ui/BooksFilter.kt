@@ -1,6 +1,7 @@
 package com.raywenderlich.android.librarian.ui.books.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +20,6 @@ import com.raywenderlich.android.librarian.ui.books.filter.Filter
 import com.raywenderlich.android.librarian.ui.composeUi.ActionButton
 import com.raywenderlich.android.librarian.ui.composeUi.RatingBar
 import com.raywenderlich.android.librarian.ui.composeUi.SpinnerPicker
-import java.lang.IllegalArgumentException
 
 @Composable
 fun BookFilter(
@@ -50,7 +50,8 @@ fun BookFilter(
         )
 
         Text(text = stringResource(id = R.string.no_filter),
-          modifier = Modifier.align(CenterVertically))
+          modifier = Modifier.align(CenterVertically),
+          color = MaterialTheme.colors.onPrimary)
       }
 
       Row {
@@ -60,7 +61,7 @@ fun BookFilter(
         )
 
         Text(text = stringResource(id = R.string.filter_by_genre),
-          modifier = Modifier.align(CenterVertically))
+          modifier = Modifier.align(CenterVertically), color = MaterialTheme.colors.onPrimary)
       }
 
       Row {
@@ -70,7 +71,7 @@ fun BookFilter(
         )
 
         Text(text = stringResource(id = R.string.filter_by_rating),
-          modifier = Modifier.align(CenterVertically))
+          modifier = Modifier.align(CenterVertically), color = MaterialTheme.colors.onPrimary)
       }
     }
 

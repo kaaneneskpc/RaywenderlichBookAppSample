@@ -1,63 +1,44 @@
-/*
- * Copyright (c) 2022 Razeware LLC
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
- * distribute, sublicense, create a derivative work, and/or sell copies of the
- * Software in any work that is designed, intended, or marketed for pedagogical or
- * instructional purposes related to programming, coding, application development,
- * or information technology.  Permission for such use, copying, modification,
- * merger, publication, distribution, sublicensing, creation of derivative works,
- * or sale is expressly withheld.
- *
- * This project and source code may use libraries or frameworks that are
- * released under various Open-Source licenses. Use of those libraries and
- * frameworks are governed by their own individual licenses.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 package com.raywenderlich.android.librarian.ui.readingListDetails
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.raywenderlich.android.librarian.R
 import com.raywenderlich.android.librarian.model.BookItem
-import com.raywenderlich.android.librarian.model.ReadingList
 import com.raywenderlich.android.librarian.model.relations.ReadingListsWithBooks
-import com.raywenderlich.android.librarian.repository.LibrarianRepository
+import com.raywenderlich.android.librarian.ui.books.ui.BooksList
+import com.raywenderlich.android.librarian.ui.composeUi.DeleteDialog
+import com.raywenderlich.android.librarian.ui.composeUi.ProjectColorTheme
+import com.raywenderlich.android.librarian.ui.composeUi.TopBar
+import com.raywenderlich.android.librarian.ui.readingListDetails.ui.BookPicker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ReadingListDetailsActivity : AppCompatActivity() {
 
-  @Inject
-  lateinit var repository: LibrarianRepository
-
-  private val _addBookState = MutableLiveData<List<BookItem>>()
-  private var readingListState: LiveData<ReadingListsWithBooks> = MutableLiveData()
+  private val readingListDetailsViewModel by viewModels<ReadingListDetailsViewModel>()
+  private val LocalReadingList = compositionLocalOf<ReadingListsWithBooks?> {
+    error("No reading list!")
+  }
 
   companion object {
     private const val KEY_READING_LIST = "reading_list"
@@ -70,74 +51,145 @@ class ReadingListDetailsActivity : AppCompatActivity() {
     }
   }
 
+  @ExperimentalFoundationApi
+  @ExperimentalMaterialApi
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val readingList = intent.getParcelableExtra<ReadingListsWithBooks>(KEY_READING_LIST)
+    val readingList = if (Build.VERSION.SDK_INT >= 33) {
+      intent.getParcelableExtra(KEY_READING_LIST, ReadingListsWithBooks::class.java)
+    } else {
+      intent.getParcelableExtra(KEY_READING_LIST)
+    }
 
     if (readingList != null) {
-      setReadingList(readingList)
+      readingListDetailsViewModel.setReadingList(readingList)
     } else {
       finish()
       return
     }
-  }
 
-  fun setReadingList(readingListsWithBooks: ReadingListsWithBooks) {
-    readingListState = repository.getReadingListById(readingListsWithBooks.id)
-      .asLiveData(lifecycleScope.coroutineContext)
-
-    refreshBooks()
-  }
-
-  fun refreshBooks() {
-    lifecycleScope.launch {
-      val books = repository.getBooks()
-      val readingListBooks = readingListState.value?.books?.map { it.book.id } ?: emptyList()
-
-      val freshBooks = books.filter { it.book.id !in readingListBooks }
-
-      _addBookState.value = freshBooks.map { BookItem(it.book.id, it.book.name, false) }
+    setContent {
+      ProjectColorTheme {
+        ReadingListDetailsContent()
+      }
     }
   }
 
-  fun addBookToReadingList(bookId: String?) {
-    val data = readingListState.value
+  @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+  @ExperimentalFoundationApi
+  @ExperimentalMaterialApi
+  @Composable
+  fun ReadingListDetailsContent() {
+    val readingListState by readingListDetailsViewModel.readingListState.observeAsState()
+    val bottomDrawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
 
-    if (data != null && bookId != null) {
-      val bookIds = (data.books.map { it.book.id } + bookId).distinct()
+    CompositionLocalProvider(LocalReadingList provides readingListState) {
+      Scaffold(
+        topBar = { ReadingListDetailsTopBar() },
+        floatingActionButton = { AddBookToReadingList(bottomDrawerState) }
+      ) {
+        ReadingListDetailsModalDrawer(bottomDrawerState)
+      }
+    }
+  }
 
-      val newReadingList = ReadingList(
-        data.id,
-        data.name,
-        bookIds
+  @ExperimentalMaterialApi
+  @Composable
+  fun AddBookToReadingList(bottomDrawerState: BottomDrawerState) {
+    val coroutineScope = rememberCoroutineScope()
+
+    FloatingActionButton(onClick = {
+      if (bottomDrawerState.isClosed) {
+        readingListDetailsViewModel.refreshBooks()
+
+        coroutineScope.launch {
+          bottomDrawerState.expand()
+        }
+      }
+    }) {
+      Icon(
+        imageVector = Icons.Default.Add,
+        contentDescription = "Add Books",
+        tint = MaterialTheme.colors.onSecondary
       )
-
-      updateReadingList(newReadingList)
     }
   }
 
-  fun removeBookFromReadingList(bookId: String) {
-    val data = readingListState.value
+  @Composable
+  fun ReadingListDetailsTopBar() {
+    val readingList = LocalReadingList.current
 
-    if (data != null) {
-      val bookIds = data.books.map { it.book.id } - bookId
+    val title = readingList?.name ?: stringResource(id = R.string.reading_list)
 
-      val newReadingList = ReadingList(
-        data.id,
-        data.name,
-        bookIds
-      )
+    TopBar(title = title, onBackPressed = { onBackPressed() })
+  }
 
-      updateReadingList(newReadingList)
+  @ExperimentalFoundationApi
+  @ExperimentalMaterialApi
+  @Composable
+  fun ReadingListDetailsModalDrawer(
+    drawerState: BottomDrawerState
+  ) {
+    val readingList = LocalReadingList.current
+    val deleteBookState by readingListDetailsViewModel.deleteBookState.observeAsState()
+    val addBookState by readingListDetailsViewModel.addBookState.observeAsState(emptyList())
+
+    val bookToDelete = deleteBookState
+
+    BottomDrawer(
+      modifier = Modifier.fillMaxWidth(),
+      drawerState = drawerState,
+      gesturesEnabled = false,
+      drawerContent = {
+        ReadingListDetailsModalDrawerContent(
+          modifier = Modifier.align(Alignment.CenterHorizontally),
+          drawerState = drawerState,
+          addBookState
+        )
+      }) {
+      Box(
+        modifier =
+        Modifier
+          .fillMaxSize(),
+        contentAlignment = Alignment.Center
+      ) {
+        BooksList(
+          readingList?.books ?: emptyList(),
+          onLongItemTap = { book -> readingListDetailsViewModel.onItemLongTapped(book) }
+        )
+
+        if (bookToDelete != null) {
+          DeleteDialog(
+            item = bookToDelete,
+            message = stringResource(id = R.string.delete_message, bookToDelete.book.name),
+            onDeleteItem = {
+              readingListDetailsViewModel.removeBookFromReadingList(it.book.id)
+              readingListDetailsViewModel.onDialogDismiss()
+            },
+            onDismiss = { readingListDetailsViewModel.onDialogDismiss() }
+          )
+        }
+      }
     }
   }
 
-  private fun updateReadingList(newReadingList: ReadingList) {
-    lifecycleScope.launch {
-      repository.updateReadingList(newReadingList)
+  @ExperimentalMaterialApi
+  @Composable
+  fun ReadingListDetailsModalDrawerContent(
+    modifier: Modifier,
+    drawerState: BottomDrawerState,
+    addBookState: List<BookItem>
+  ) {
+    val coroutineScope = rememberCoroutineScope()
 
-      refreshBooks()
-    }
+    BookPicker(
+      modifier = modifier,
+      books = addBookState,
+      onBookSelected = { readingListDetailsViewModel.bookPickerItemSelected(it) },
+      onBookPicked = {
+        readingListDetailsViewModel.addBookToReadingList(addBookState.firstOrNull { it.isSelected }?.bookId)
+
+        coroutineScope.launch { drawerState.close() }
+      }, onDismiss = { coroutineScope.launch { drawerState.close() } })
   }
-
 }

@@ -114,10 +114,6 @@ fun BookReviewItem(
           bottomStart = 0.dp),
         elevation = 16.dp) {
 
-        /**
-         * Update Note: CoilImage composable is old not compatible with current Jetpack Compose version.
-         * Use AsyncImage instead of CoilImage composable with updated parameters.
-         * */
         AsyncImage(
           model = bookReview.review.imageUrl,
           contentScale = ContentScale.FillWidth,
