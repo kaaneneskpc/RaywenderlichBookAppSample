@@ -9,13 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.raywenderlich.android.librarian.R
-import com.raywenderlich.android.librarian.model.relations.BookReview
 
 @Composable
-fun DeleteReviewDialog(
-    item: BookReview,
+fun <T> DeleteDialog(
+    item: T,
     message: String,
-    onDeleteItem: (BookReview) -> Unit,
+    onDeleteItem: (T) -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -23,18 +22,16 @@ fun DeleteReviewDialog(
         text = { Text(text = message) },
         onDismissRequest = onDismiss,
         buttons = {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
                 DialogButton(
                     text = R.string.yes,
-                    onClickAction = {
-                        onDeleteItem(item)
-                    }
+                    onClickAction = { onDeleteItem(item) }
                 )
-                DialogButton(
-                    text = R.string.cancel,
-                    onClickAction = onDismiss
-                )
+
+                DialogButton(text = R.string.cancel, onClickAction = onDismiss)
             }
-        }
-    )
+        })
 }

@@ -4,19 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.raywenderlich.android.librarian.R
@@ -98,7 +102,12 @@ class ReadingListFragment : Fragment() {
 
   @Composable
   fun AddReadingListButton() {
-    FloatingActionButton(onClick = {
+    val isShowingAddReadingList = _isShowingAddReadingListState.value ?: false
+    val size by animateDpAsState(targetValue = if (isShowingAddReadingList) 0.dp else 56.dp)
+
+    FloatingActionButton(
+      modifier = Modifier.size(size),
+      onClick = {
       _isShowingAddReadingListState.value = true
     }) {
       Icon(imageVector = Icons.Default.Add, contentDescription = "Add Reading List")

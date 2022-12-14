@@ -13,7 +13,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,11 +26,7 @@ import com.raywenderlich.android.librarian.model.Review
 import com.raywenderlich.android.librarian.model.relations.BookAndGenre
 import com.raywenderlich.android.librarian.model.state.AddBookReviewState
 import com.raywenderlich.android.librarian.repository.LibrarianRepository
-import com.raywenderlich.android.librarian.ui.addReview.ui.BookPicker
-import com.raywenderlich.android.librarian.ui.composeUi.ActionButton
-import com.raywenderlich.android.librarian.ui.composeUi.InputField
-import com.raywenderlich.android.librarian.ui.composeUi.RatingBar
-import com.raywenderlich.android.librarian.ui.composeUi.TopBar
+import com.raywenderlich.android.librarian.ui.composeUi.*
 import com.raywenderlich.android.librarian.utils.EMPTY_BOOK_AND_GENRE
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -100,8 +95,11 @@ class AddBookReviewActivity : AppCompatActivity(), AddReviewView {
 
       Spacer(modifier = Modifier.height(8.dp))
 
-      BookPicker(
-        books = _books.value, selectedBookId = currentlySelectedBook.value.book.id,
+      SpinnerPicker(
+        pickerText = stringResource(id = R.string.book_select),
+        items = _books.value,
+        itemToName = { it.book.name },
+        preSelectedItem = currentlySelectedBook.value,
         onItemPicked = { bookAndGenre ->
           _bookReviewState.value = _bookReviewState.value?.copy(bookAndGenre = bookAndGenre)
 
