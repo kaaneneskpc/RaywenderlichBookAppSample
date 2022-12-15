@@ -57,7 +57,6 @@ class BooksViewModel @Inject constructor(
         viewModelScope.launch {
             repository.removeBook(book)
             loadBooks()
-            cancelDeleteBook()
         }
     }
 
