@@ -31,3 +31,30 @@ Book application using @Raywenderlich infrastructure
 </ul>
 
 # Screenshoots 📷 
+
+https://user-images.githubusercontent.com/32849662/208295763-02e8804c-ea75-46b1-baca-ad284099b467.mp4
+
+## ✉️ Find me on:
+
+
+[![Medium](https://img.shields.io/badge/Medium-@kaaneneskpc-9146FF?style=for-the-badge&logo=medium&logoColor=white&labelColor=101010)](https://medium.com/@kaaneneskpc)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-kaaneneskpc-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&labelColor=101010)](https://www.linkedin.com/in/kaaneneskpc/)
+[![Twitter](https://img.shields.io/badge/Twitter-@kaaneneskpc-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white&labelColor=101010)](https://twitter.com/kaaneneskpc)
+[![Instagram](https://img.shields.io/badge/Instagram-@kaaneneskpc-E4405F?style=for-the-badge&logo=instagram&logoColor=white&labelColor=101010)](https://instagram.com/kaaneneskpc)
+</br>
+
+
+## Contact me:
+
+[![Email](https://img.shields.io/badge/kaaneneskpc1@gmail.com-my_personal_email-EC5252?style=for-the-badge&logo=gmail&logoColor=white&labelColor=101010)](mailto:kaaneneskpc1@gmail.com)
+<br />
+
+
+
+
+
+
+
+
+
+
